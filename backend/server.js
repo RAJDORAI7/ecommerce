@@ -26,24 +26,34 @@ connectDB();
 
 const app = express();
 
-// Security Middleware
-app.use(helmet());
+// ── CORS (must be BEFORE helmet and rate-limiter) ──────────────
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://ecommerce-1-nkuz.onrender.com',       // Render frontend
-  'https://ecommerce-1-frontend-8uep.onrender.com', // previous Render frontend
+  'http://localhost:3000',
+  'https://ecommerce-1-nkuz.onrender.com',
+  'https://ecommerce-1-frontend-8uep.onrender.com',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests for ALL routes explicitly
+app.options('*', cors(corsOptions));
+
+// Security Middleware (after CORS so it doesn't strip CORS headers)
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 // Rate Limiting
 const limiter = rateLimit({
