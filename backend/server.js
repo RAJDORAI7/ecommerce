@@ -31,6 +31,8 @@ app.use(helmet());
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4173',
+  'https://ecommerce-1-nkuz.onrender.com',       // Render frontend
+  'https://ecommerce-1-frontend-8uep.onrender.com', // previous Render frontend
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
